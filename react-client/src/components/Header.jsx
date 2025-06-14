@@ -1,3 +1,4 @@
+import React from 'react'
 import { FaSearch } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -25,16 +26,14 @@ export default function Header() {
     return (
         <header className='bg-slate-200 shadow-md'>
             <div className='flex justify-between items-center max-w-6xl mx-auto p-3'>
-                <Link to='/'>
+                <Link to={'/'}>
                     <h1 className='font-bold text-sm sm:text-xl flex flex-wrap'>
-                        <span className='text-slate-500'>Sahand</span>
-                        <span className='text-slate-700'>Estate</span>
+                        <span className='text-slate-700'>Bricks</span>
+                        <span className='text-slate-500'>&</span>
+                        <span className='text-slate-700'>Clicks</span>
                     </h1>
                 </Link>
-                <form
-                    onSubmit={handleSubmit}
-                    className='bg-slate-100 p-3 rounded-lg flex items-center'
-                >
+                <form onSubmit={handleSubmit} className='bg-slate-100 p-3 rounded-lg flex items-center'>
                     <input
                         type='text'
                         placeholder='Search...'
@@ -43,8 +42,9 @@ export default function Header() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <button>
-                        <FaSearch className='text-slate-600' />
+                        <FaSearch className='text-slate-600 opacity-80 hover:opacity-100 hover:h-[18px] hover:w-[18px]' />
                     </button>
+
                 </form>
                 <ul className='flex gap-4'>
                     <Link to='/'>
@@ -68,8 +68,10 @@ export default function Header() {
                             <li className=' text-slate-700 hover:underline'> Sign in</li>
                         )}
                     </Link>
+
                 </ul>
             </div>
+
         </header>
-    );
+    )
 }
