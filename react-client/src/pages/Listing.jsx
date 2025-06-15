@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import SwiperCore from 'swiper';
+// import SwiperCore from 'swiper';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css/bundle';
 import { useSelector } from 'react-redux';
@@ -19,7 +19,7 @@ import Contact from '../components/Contact';
 // https://sabe.io/blog/javascript-format-numbers-commas#:~:text=The%20best%20way%20to%20format,format%20the%20number%20with%20commas.
 
 export default function Listing() {
-    SwiperCore.use([Navigation, Pagination, Autoplay]);
+    // SwiperCore.use([Navigation, Pagination, Autoplay]);
     const [listing, setListing] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
@@ -59,6 +59,7 @@ export default function Listing() {
             {listing && !loading && !error && (
                 <div>
                     <Swiper
+                        modules={[Navigation, Pagination, Autoplay]}
                         loop={true} // enables infinite loop
                         slidesPerView={1}
                         spaceBetween={20}
