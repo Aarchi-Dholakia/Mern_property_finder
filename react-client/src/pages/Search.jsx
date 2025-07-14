@@ -12,96 +12,59 @@ export default function Search() {
         offer: false,
         sort: 'created_at',
         order: 'desc',
+        minPrice: '50',
+        maxPrice: '',
     });
 
     const [loading, setLoading] = useState(false);
     const [listings, setListings] = useState([]);
     const [showMore, setShowMore] = useState(false);
+    const [priceError, setPriceError] = useState('');
 
-    useEffect(() => {
-        const urlParams = new URLSearchParams(location.search);
-        const searchTermFromUrl = urlParams.get('searchTerm');
-        const typeFromUrl = urlParams.get('type');
-        const parkingFromUrl = urlParams.get('parking');
-        const furnishedFromUrl = urlParams.get('furnished');
-        const offerFromUrl = urlParams.get('offer');
-        const sortFromUrl = urlParams.get('sort');
-        const orderFromUrl = urlParams.get('order');
-
-        if (
-            searchTermFromUrl ||
-            typeFromUrl ||
-            parkingFromUrl ||
-            furnishedFromUrl ||
-            offerFromUrl ||
-            sortFromUrl ||
-            orderFromUrl
-        ) {
-            setSidebardata({
-                searchTerm: searchTermFromUrl || '',
-                type: typeFromUrl || 'all',
-                parking: parkingFromUrl === 'true' ? true : false,
-                furnished: furnishedFromUrl === 'true' ? true : false,
-                offer: offerFromUrl === 'true' ? true : false,
-                sort: sortFromUrl || 'created_at',
-                order: orderFromUrl || 'desc',
-            });
-        }
-
-        const fetchListings = async () => {
-            setLoading(true);
-            setShowMore(false);
-            const searchQuery = urlParams.toString();
+    const fetchListings = async (searchQuery = '') => {
+        setLoading(true);
+        setShowMore(false);
+        try {
             const res = await fetch(`/api/listing/get?${searchQuery}`);
             const data = await res.json();
             if (data.length > 8) {
                 setShowMore(true);
-            } else {
-                setShowMore(false);
             }
             setListings(data);
+        } catch (error) {
+            console.error('Fetch error:', error);
+        } finally {
             setLoading(false);
-        };
-
-        fetchListings();
-    }, [location.search]);
-
-    const handleChange = (e) => {
-        if (
-            e.target.id === 'all' ||
-            e.target.id === 'rent' ||
-            e.target.id === 'sale'
-        ) {
-            setSidebardata({ ...sidebardata, type: e.target.id });
-        }
-
-        if (e.target.id === 'searchTerm') {
-            setSidebardata({ ...sidebardata, searchTerm: e.target.value });
-        }
-
-        if (
-            e.target.id === 'parking' ||
-            e.target.id === 'furnished' ||
-            e.target.id === 'offer'
-        ) {
-            setSidebardata({
-                ...sidebardata,
-                [e.target.id]:
-                    e.target.checked || e.target.checked === 'true' ? true : false,
-            });
-        }
-
-        if (e.target.id === 'sort_order') {
-            const sort = e.target.value.split('_')[0] || 'created_at';
-
-            const order = e.target.value.split('_')[1] || 'desc';
-
-            setSidebardata({ ...sidebardata, sort, order });
         }
     };
 
-    const handleSubmit = (e) => {
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const fetchAndUpdateState = async () => {
+            await fetchListings(urlParams.toString());
+        };
+        fetchAndUpdateState();
+    }, [window.location.search]);
+
+    const handleChange = (e) => {
+        const { id, value, type, checked } = e.target;
+
+        setSidebardata(prev => ({
+            ...prev,
+            [id]: type === 'checkbox' ? checked : value,
+            ...(id === 'all' || id === 'rent' || id === 'sale') && { type: id }
+        }));
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (sidebardata.maxPrice && parseInt(sidebardata.minPrice) > parseInt(sidebardata.maxPrice)) {
+            setPriceError('Minimum price cannot be greater than maximum price');
+            return;
+        }
+        setPriceError('');
+
         const urlParams = new URLSearchParams();
         urlParams.set('searchTerm', sidebardata.searchTerm);
         urlParams.set('type', sidebardata.type);
@@ -110,31 +73,32 @@ export default function Search() {
         urlParams.set('offer', sidebardata.offer);
         urlParams.set('sort', sidebardata.sort);
         urlParams.set('order', sidebardata.order);
-        const searchQuery = urlParams.toString();
-        navigate(`/search?${searchQuery}`);
+        if (sidebardata.minPrice) urlParams.set('minPrice', sidebardata.minPrice);
+        if (sidebardata.maxPrice) urlParams.set('maxPrice', sidebardata.maxPrice);
+
+        const queryString = urlParams.toString();
+        navigate(`/search?${queryString}`);
+        await fetchListings(queryString); // Immediate fetch after navigation
     };
 
     const onShowMoreClick = async () => {
-        const numberOfListings = listings.length;
-        const startIndex = numberOfListings;
-        const urlParams = new URLSearchParams(location.search);
+        const startIndex = listings.length;
+        const urlParams = new URLSearchParams(window.location.search);
         urlParams.set('startIndex', startIndex);
-        const searchQuery = urlParams.toString();
-        const res = await fetch(`/api/listing/get?${searchQuery}`);
+
+        const res = await fetch(`/api/listing/get?${urlParams.toString()}`);
         const data = await res.json();
-        if (data.length < 9) {
-            setShowMore(false);
-        }
+        if (data.length < 9) setShowMore(false);
         setListings([...listings, ...data]);
     };
+
     return (
         <div className='flex flex-col md:flex-row'>
-            <div className='p-7  border-b-2 md:border-r-2 md:min-h-screen'>
+            <div className='p-7 border-b-2 md:border-r-2 md:min-h-screen'>
                 <form onSubmit={handleSubmit} className='flex flex-col gap-8'>
+                    {/* Search Term */}
                     <div className='flex items-center gap-2'>
-                        <label className='whitespace-nowrap font-semibold'>
-                            Search Term:
-                        </label>
+                        <label className='whitespace-nowrap font-semibold'>Search Term:</label>
                         <input
                             type='text'
                             id='searchTerm'
@@ -144,6 +108,8 @@ export default function Search() {
                             onChange={handleChange}
                         />
                     </div>
+
+                    {/* Type Filter */}
                     <div className='flex gap-2 flex-wrap items-center'>
                         <label className='font-semibold'>Type:</label>
                         <div className='flex gap-2'>
@@ -187,6 +153,8 @@ export default function Search() {
                             <span>Offer</span>
                         </div>
                     </div>
+
+                    {/* Amenities */}
                     <div className='flex gap-2 flex-wrap items-center'>
                         <label className='font-semibold'>Amenities:</label>
                         <div className='flex gap-2'>
@@ -210,6 +178,37 @@ export default function Search() {
                             <span>Furnished</span>
                         </div>
                     </div>
+
+                    {/* Price Range */}
+                    <div className='flex flex-col gap-4'>
+                        <div className='flex items-center gap-2'>
+                            <label className='whitespace-nowrap font-semibold'>Min Price ($):</label>
+                            <input
+                                type='number'
+                                id='minPrice'
+                                min='0'
+                                placeholder='50'
+                                className='border rounded-lg p-3 w-full'
+                                value={sidebardata.minPrice}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className='flex items-center gap-2'>
+                            <label className='whitespace-nowrap font-semibold'>Max Price ($):</label>
+                            <input
+                                type='number'
+                                id='maxPrice'
+                                min='0'
+                                placeholder='No limit'
+                                className='border rounded-lg p-3 w-full'
+                                value={sidebardata.maxPrice}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        {priceError && <p className='text-red-500 text-sm'>{priceError}</p>}
+                    </div>
+
+                    {/* Sort */}
                     <div className='flex items-center gap-2'>
                         <label className='font-semibold'>Sort:</label>
                         <select
@@ -219,16 +218,22 @@ export default function Search() {
                             className='border rounded-lg p-3'
                         >
                             <option value='regularPrice_desc'>Price high to low</option>
-                            <option value='regularPrice_asc'>Price low to hight</option>
+                            <option value='regularPrice_asc'>Price low to high</option>
                             <option value='createdAt_desc'>Latest</option>
                             <option value='createdAt_asc'>Oldest</option>
                         </select>
                     </div>
-                    <button className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95'>
+
+                    <button
+                        type='submit'
+                        className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95'
+                    >
                         Search
                     </button>
                 </form>
             </div>
+
+            {/* Results */}
             <div className='flex-1'>
                 <h1 className='text-3xl font-semibold border-b p-3 text-slate-700 mt-5'>
                     Listing results:
@@ -243,11 +248,9 @@ export default function Search() {
                         </p>
                     )}
 
-                    {!loading &&
-                        listings &&
-                        listings.map((listing) => (
-                            <ListingItem key={listing._id} listing={listing} />
-                        ))}
+                    {!loading && listings.map((listing) => (
+                        <ListingItem key={listing._id} listing={listing} />
+                    ))}
 
                     {showMore && (
                         <button

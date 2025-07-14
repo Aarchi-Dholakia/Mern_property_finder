@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -8,6 +8,7 @@ export default function Header() {
     const { currentUser } = useSelector((state) => state.user);
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
+
     const handleSubmit = (e) => {
         e.preventDefault();
         const urlParams = new URLSearchParams(window.location.search);
@@ -23,55 +24,60 @@ export default function Header() {
             setSearchTerm(searchTermFromUrl);
         }
     }, [location.search]);
+
     return (
-        <header className='bg-slate-200 shadow-md'>
+        <header className='bg-gradient-to-r from-teal-800 to-indigo-800 shadow-lg border-b border-teal-600'>
             <div className='flex justify-between items-center max-w-6xl mx-auto p-3'>
                 <Link to={'/'}>
                     <h1 className='font-bold text-sm sm:text-xl flex flex-wrap'>
-                        <span className='text-slate-700'>Bricks</span>
-                        <span className='text-slate-500'>&</span>
-                        <span className='text-slate-700'>Clicks</span>
+                        <span className='text-teal-200'>Bricks</span>
+                        <span className='text-indigo-300'>&</span>
+                        <span className='text-indigo-100'>Clicks</span>
                     </h1>
                 </Link>
-                <form onSubmit={handleSubmit} className='bg-slate-100 p-3 rounded-lg flex items-center'>
+
+                <form
+                    onSubmit={handleSubmit}
+                    className='bg-white/10 p-2 rounded-lg flex items-center border border-teal-400/30 focus-within:ring-2 focus-within:ring-teal-300 focus-within:border-transparent transition-all'
+                >
                     <input
                         type='text'
                         placeholder='Search...'
-                        className='bg-transparent focus:outline-none w-24 sm:w-64'
+                        className='bg-transparent focus:outline-none w-24 sm:w-64 text-white placeholder-teal-200'
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <button>
-                        <FaSearch className='text-slate-600 opacity-80 hover:opacity-100 hover:h-[18px] hover:w-[18px]' />
+                    <button className='p-1'>
+                        <FaSearch className='text-teal-200 hover:text-white transition-colors' />
                     </button>
-
                 </form>
-                <ul className='flex gap-4'>
+
+                <ul className='flex gap-4 items-center'>
                     <Link to='/'>
-                        <li className='hidden sm:inline text-slate-700 hover:underline'>
+                        <li className='hidden sm:inline text-teal-100 hover:text-white hover:underline transition-colors'>
                             Home
                         </li>
                     </Link>
                     <Link to='/about'>
-                        <li className='hidden sm:inline text-slate-700 hover:underline'>
+                        <li className='hidden sm:inline text-teal-100 hover:text-white hover:underline transition-colors'>
                             About
                         </li>
                     </Link>
                     <Link to='/profile'>
                         {currentUser ? (
                             <img
-                                className='rounded-full h-7 w-7 object-cover'
+                                className='rounded-full h-7 w-7 object-cover border-2 border-teal-400 hover:border-white transition-colors'
                                 src={currentUser.avatar}
                                 alt='profile'
                             />
                         ) : (
-                            <li className=' text-slate-700 hover:underline'> Sign in</li>
+                            <li className='text-teal-100 hover:text-white hover:underline transition-colors'>
+                                Sign in
+                            </li>
                         )}
                     </Link>
-
                 </ul>
             </div>
-
         </header>
-    )
+    );
 }

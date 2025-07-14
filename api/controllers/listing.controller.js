@@ -27,7 +27,7 @@ export const deleteListing = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-  };
+};
 
 export const updateListing = async (req, res, next) => {
     const listing = await Listing.findById(req.params.id);
@@ -66,43 +66,36 @@ export const getListings = async (req, res, next) => {
     try {
         const limit = parseInt(req.query.limit) || 9;
         const startIndex = parseInt(req.query.startIndex) || 0;
+
+        // Parse query parameters
         let offer = req.query.offer;
-
-        if (offer === undefined || offer === 'false') {
-            offer = { $in: [false, true] };
-        }
-
         let furnished = req.query.furnished;
-
-        if (furnished === undefined || furnished === 'false') {
-            furnished = { $in: [false, true] };
-        }
-
         let parking = req.query.parking;
-
-        if (parking === undefined || parking === 'false') {
-            parking = { $in: [false, true] };
-        }
-
         let type = req.query.type;
+        const searchTerm = req.query.searchTerm || '';
+        const sort = req.query.sort || 'createdAt';
+        const order = req.query.order || 'desc';
+        const minPrice = req.query.minPrice ? parseInt(req.query.minPrice) : undefined;
+        const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice) : undefined;
 
-        if (type === undefined || type === 'all') {
-            type = { $in: ['sale', 'rent'] };
+        // Set up filters
+        const filters = {
+            name: { $regex: searchTerm, $options: 'i' },
+            offer: (offer === undefined || offer === 'false') ? { $in: [false, true] } : offer,
+            furnished: (furnished === undefined || furnished === 'false') ? { $in: [false, true] } : furnished,
+            parking: (parking === undefined || parking === 'false') ? { $in: [false, true] } : parking,
+            type: (type === undefined || type === 'all') ? { $in: ['sale', 'rent'] } : type
+        };
+
+        // Add price range filter if applicable
+        if (minPrice !== undefined || maxPrice !== undefined) {
+            filters.regularPrice = {};
+            if (minPrice !== undefined) filters.regularPrice.$gte = minPrice;
+            if (maxPrice !== undefined) filters.regularPrice.$lte = maxPrice;
         }
 
-        const searchTerm = req.query.searchTerm || '';
-
-        const sort = req.query.sort || 'createdAt';
-
-        const order = req.query.order || 'desc';
-
-        const listings = await Listing.find({
-            name: { $regex: searchTerm, $options: 'i' },
-            offer,
-            furnished,
-            parking,
-            type,
-        })
+        // Execute query
+        const listings = await Listing.find(filters)
             .sort({ [sort]: order })
             .limit(limit)
             .skip(startIndex);
@@ -111,4 +104,4 @@ export const getListings = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-  };
+};
