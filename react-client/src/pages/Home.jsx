@@ -87,13 +87,13 @@ export default function Home() {
             </Link>
             <Link
               to={'/about'}
-              className='px-6 py-3 rounded-lg border-2 border-teal-600 text-teal-600 hover:bg-teal-50 transition-colors text-center font-medium'
+              className='px-6 py-3 rounded-lg border-2 border-teal-600 text-teal-600 hover:bg-teal-100 transition-colors text-center font-medium'
             >
               Learn About Us
             </Link>
             <Link
               to='/create-listing'
-              className='w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2'
+              className='px-6 py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 font-medium transition-colors flex items-center justify-center gap-2'
             >
               <FaHome /> Create New Listing
             </Link>
@@ -199,7 +199,7 @@ export default function Home() {
                 View All Rentals
               </Link>
             </div>
-            <div className='grid sm:grid-cols-1 grid-cols-2 gap-8'> {/* Added gap-6 for spacing */}
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-8'> {/* Added gap-6 for spacing */}
               {rentListings.map((listing) => (
                 <div key={listing._id} className="w-full"> {/* Added container div with full width */}
                   <ListingItem listing={listing} />
@@ -223,7 +223,7 @@ export default function Home() {
                 View All Sales
               </Link>
             </div>
-            <div className='grid sm:grid-cols-1 grid-cols-2 gap-6'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               {saleListings.map((listing) => (
                 <ListingItem listing={listing} key={listing._id} />
               ))}
