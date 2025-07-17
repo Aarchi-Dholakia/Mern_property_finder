@@ -88,7 +88,7 @@ export default function Search() {
 
         const res = await fetch(`/api/listing/get?${urlParams.toString()}`);
         const data = await res.json();
-        if (data.length < 9) setShowMore(false);
+        if (data.length < 6) setShowMore(false);
         setListings([...listings, ...data]);
     };
 

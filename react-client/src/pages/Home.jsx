@@ -91,6 +91,12 @@ export default function Home() {
             >
               Learn About Us
             </Link>
+            <Link
+              to='/create-listing'
+              className='w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2'
+            >
+              <FaHome /> Create New Listing
+            </Link>
           </div>
         </div>
         {/* <div className="absolute inset-0 bg-gradient-to-r from-indigo-50 to-transparent opacity-90"></div> */}
@@ -193,7 +199,7 @@ export default function Home() {
                 View All Rentals
               </Link>
             </div>
-            <div className='grid grid-cols-2 grid-rows-2 gap-8'> {/* Added gap-6 for spacing */}
+            <div className='grid sm:grid-cols-1 grid-cols-2 gap-8'> {/* Added gap-6 for spacing */}
               {rentListings.map((listing) => (
                 <div key={listing._id} className="w-full"> {/* Added container div with full width */}
                   <ListingItem listing={listing} />
@@ -217,7 +223,7 @@ export default function Home() {
                 View All Sales
               </Link>
             </div>
-            <div className='grid grid-cols-2 gap-6'>
+            <div className='grid sm:grid-cols-1 grid-cols-2 gap-6'>
               {saleListings.map((listing) => (
                 <ListingItem listing={listing} key={listing._id} />
               ))}
